@@ -7,6 +7,7 @@ import com.example.data.models.UserRemoteModel
 import com.example.use_cases.models.ItemMediaType
 import com.example.use_cases.models.PostItemModel
 import dagger.Reusable
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @Reusable
@@ -48,7 +49,7 @@ class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInte
                     mediaType = videoOrImage,
                     storageRef = storageRef?.stringValue,
                     authorUserName = username,
-                    createdAt = createdAt?.timestampValue
+                    createdAt = createdAt?.timestampValue?.let { dateTime -> LocalDateTime.parse(dateTime) }
                 )
             }
         }

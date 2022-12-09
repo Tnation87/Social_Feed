@@ -1,7 +1,9 @@
 package com.example.use_cases.models
 
+import java.time.LocalDateTime
+
 data class PostItemModel(
-    val createdAt: String?,
+    val createdAt: LocalDateTime?,
     val mediaType: ItemMediaType?,
     val comments: List<String>?,
     val id: String?,
