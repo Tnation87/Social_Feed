@@ -4,6 +4,7 @@ import com.example.data.ApiServiceInteractor
 import com.example.data.errors.ResponseError
 import com.example.data.models.PostRemoteModel
 import com.example.data.models.UserRemoteModel
+import com.example.use_cases.models.ItemMediaType
 import com.example.use_cases.models.PostItemModel
 import dagger.Reusable
 import javax.inject.Inject
@@ -34,11 +35,17 @@ class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInte
     private fun mapToItem(username: String?, remoteModel: PostRemoteModel?): PostItemModel? {
         return remoteModel?.postFields?.let {
             with(it) {
+                val videoOrImage = when (mediaType?.stringValue) {
+                    "photo" -> ItemMediaType.IMAGE
+                    "video" -> ItemMediaType.VIDEO
+                    else -> null
+                }
+
                 PostItemModel(
                     id = id?.stringValue,
                     caption = caption?.stringValue,
                     comments = comments?.arrayValue?.values?.mapNotNull { comment -> comment.stringValue },
-                    mediaType = mediaType?.stringValue,
+                    mediaType = videoOrImage,
                     storageRef = storageRef?.stringValue,
                     authorUserName = username,
                     createdAt = createdAt?.timestampValue

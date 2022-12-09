@@ -6,10 +6,12 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class PostUiModel(
     val createdAt: String?,
-    val mediaType: String?,
+    val mediaType: UiMediaType?,
     val comments: List<String>?,
     val id: String?,
     val caption: String?,
     val storageRef: String?,
     val authorUserName: String?
 ) : UiModel, Parcelable
+
+enum class UiMediaType{VIDEO, IMAGE}
