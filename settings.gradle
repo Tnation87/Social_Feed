@@ -16,3 +16,4 @@ rootProject.name = "Social_Feed"
 include ':app'
 include ':data'
 include ':use-cases'
+include ':presentation'
