@@ -9,7 +9,7 @@ data class PostUiModel(
     val createdAt: LocalDateTime?,
     val mediaType: UiMediaType?,
     val comments: List<String>?,
-    val id: String?,
+    val id: String,
     val caption: String?,
     val storageRef: String?,
     val authorUserName: String?

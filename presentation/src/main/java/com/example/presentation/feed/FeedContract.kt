@@ -9,7 +9,6 @@ class FeedContract {
     object ShowFeedIntent : UiIntent
 
     sealed class FeedViewState: UiState {
-        object Idle : FeedViewState()
         object Loading : FeedViewState()
         data class Success(val postsList : List<PostUiModel>) : FeedViewState()
         object Error: FeedViewState()

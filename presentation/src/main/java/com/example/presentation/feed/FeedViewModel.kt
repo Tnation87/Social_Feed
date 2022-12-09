@@ -11,7 +11,7 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(val getPostsUseCase: GetPostsUseCase) :
     BaseViewModel<FeedContract.ShowFeedIntent, FeedContract.FeedViewState>() {
     override fun createInitialState(): FeedContract.FeedViewState {
-        return FeedContract.FeedViewState.Idle
+        return FeedContract.FeedViewState.Loading
     }
 
     override fun handleIntent(intent: FeedContract.ShowFeedIntent) {
@@ -23,9 +23,6 @@ class FeedViewModel @Inject constructor(val getPostsUseCase: GetPostsUseCase) :
      */
     private fun getPosts() {
         viewModelScope.launch(Dispatchers.IO) {
-            // Set Loading
-            setState { FeedContract.FeedViewState.Loading }
-
             val postsList = getPostsUseCase()
             if (postsList.isNotEmpty())
                 setState {

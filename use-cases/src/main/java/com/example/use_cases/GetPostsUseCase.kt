@@ -3,7 +3,6 @@ package com.example.use_cases
 import com.example.data.ApiServiceInteractor
 import com.example.data.errors.ResponseError
 import com.example.data.models.PostRemoteModel
-import com.example.data.models.UserRemoteModel
 import com.example.use_cases.models.ItemMediaType
 import com.example.use_cases.models.PostItemModel
 import dagger.Reusable
@@ -18,17 +17,14 @@ class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInte
             val users = apiService.getUsers().await()
             val posts = apiService.getPosts().await()
             posts.documents.mapNotNull {
-                val post = it as? PostRemoteModel
                 val username =
-                    (users.documents as List<UserRemoteModel>).mapNotNull { user -> user.userFields?.username?.stringValue }
+                    users.documents.mapNotNull { user -> user.userFields?.username?.stringValue }
                         .firstOrNull { username ->
-                            username == post?.postFields?.authorID?.stringValue
+                            username == it.postFields?.authorID?.stringValue
                         }
-                mapToItem(username, post)
+                mapToItem(username, it)
             }
         } catch (e: ResponseError) {
-            emptyList()
-        } catch (e: ClassCastException) {
             emptyList()
         }
     }
@@ -42,15 +38,17 @@ class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInte
                     else -> null
                 }
 
-                PostItemModel(
-                    id = id?.stringValue,
-                    caption = caption?.stringValue,
-                    comments = comments?.arrayValue?.values?.mapNotNull { comment -> comment.stringValue },
-                    mediaType = videoOrImage,
-                    storageRef = storageRef?.stringValue,
-                    authorUserName = username,
-                    createdAt = createdAt?.timestampValue?.let { dateTime -> LocalDateTime.parse(dateTime) }
-                )
+                id.stringValue?.let { id ->
+                    PostItemModel(
+                        id = id,
+                        caption = caption?.stringValue,
+                        comments = comments?.arrayValue?.values?.mapNotNull { comment -> comment.stringValue },
+                        mediaType = videoOrImage,
+                        storageRef = storageRef?.stringValue,
+                        authorUserName = username,
+                        createdAt = createdAt?.timestampValue?.let { dateTime -> LocalDateTime.parse(dateTime) }
+                    )
+                }
             }
         }
     }

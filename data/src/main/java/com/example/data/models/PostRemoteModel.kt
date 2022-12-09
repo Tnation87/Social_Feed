@@ -8,7 +8,7 @@ data class PostFields(
     val createdAt: TimeStampValue?,
     val mediaType: StringValue?,
     val comments: ArrayValue?,
-    val id: StringValue?,
+    val id: StringValue,
     val caption: StringValue?,
     val storageRef: StringValue?,
     val authorID: StringValue?
