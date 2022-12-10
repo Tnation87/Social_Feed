@@ -12,10 +12,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -244,6 +247,27 @@ fun MediaPost(post: PostUiModel) {
             )
         }
 
+        post.comments?.let {
+            if (it.isNotEmpty()) {
+                var showComments by remember { mutableStateOf(false) }
+
+                if (!showComments)
+                    CommentsHeader(icon = Icons.Default.ArrowDownward) {
+                        showComments = true
+                    }
+                else {
+                    Column {
+                        CommentsHeader(icon = Icons.Default.ArrowUpward) {
+                            showComments = false
+                        }
+
+                        CommentsSection(comments = it)
+                    }
+                }
+
+            }
+        }
+
         post.createdAt?.let {
             Text(
                 modifier = Modifier
@@ -259,13 +283,39 @@ fun MediaPost(post: PostUiModel) {
             )
         }
 
-//        post.comments?.let { if (it.isNotEmpty())
-//            LazyColumn {
-//            }
-//        }
-
-        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Separator()
     }
+}
+
+@Composable
+fun CommentsHeader(icon: ImageVector, onClick: () -> Unit) {
+    Row(modifier = Modifier
+        .padding(vertical = 8.dp)
+        .clickable { onClick() }) {
+        Icon(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            imageVector = icon,
+            contentDescription = null
+        )
+
+        Text(
+            text = "Comments",
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun CommentsSection(comments: List<String>) {
+    comments.forEach { comment ->
+        Text(modifier = Modifier.padding(vertical = 8.dp), text = comment)
+        Separator()
+    }
+}
+
+@Composable
+fun Separator() {
+    Divider(modifier = Modifier.padding(vertical = 16.dp))
 }
 
 @Composable
