@@ -14,6 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Social_Feed"
 include ':app'
-include ':data'
+include ':remote'
 include ':use-cases'
 include ':presentation'
+include ':repos'

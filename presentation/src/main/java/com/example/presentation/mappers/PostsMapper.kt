@@ -2,20 +2,20 @@ package com.example.presentation.mappers
 
 import com.example.presentation.models.PostUiModel
 import com.example.presentation.models.UiMediaType
-import com.example.use_cases.models.ItemMediaType
-import com.example.use_cases.models.PostItemModel
+import com.example.use_cases.models.MediaType
+import com.example.use_cases.models.PostModel
 
 class PostsMapper :
-    UiModelMapper<PostItemModel, PostUiModel> {
-        override fun mapFromUiModel(model: PostUiModel): PostItemModel {
+    UiModelMapper<PostModel, PostUiModel> {
+        override fun mapFromUiModel(model: PostUiModel): PostModel {
             return with(model) {
                 val videoOrImage = when (mediaType) {
-                    UiMediaType.IMAGE -> ItemMediaType.IMAGE
-                    UiMediaType.VIDEO -> ItemMediaType.VIDEO
+                    UiMediaType.IMAGE -> MediaType.IMAGE
+                    UiMediaType.VIDEO -> MediaType.VIDEO
                     null -> null
                 }
 
-                PostItemModel(
+                PostModel(
                     id = id,
                     caption = caption,
                     comments = comments,
@@ -27,11 +27,11 @@ class PostsMapper :
             }
         }
 
-        override fun mapToUiModel(model: PostItemModel): PostUiModel {
+        override fun mapToUiModel(model: PostModel): PostUiModel {
             return with(model) {
                 val videoOrImage = when (mediaType) {
-                    ItemMediaType.IMAGE -> UiMediaType.IMAGE
-                    ItemMediaType.VIDEO -> UiMediaType.VIDEO
+                    MediaType.IMAGE -> UiMediaType.IMAGE
+                    MediaType.VIDEO -> UiMediaType.VIDEO
                     null -> null
                 }
 

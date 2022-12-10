@@ -1,5 +1,6 @@
 package com.example.presentation.models
 
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
@@ -11,7 +12,7 @@ data class PostUiModel(
     val comments: List<String>?,
     val id: String,
     val caption: String?,
-    val storageRef: String?,
+    val storageRef: Uri?,
     val authorUserName: String?
 ) : UiModel, Parcelable
 

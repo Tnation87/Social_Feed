@@ -1,27 +1,34 @@
 package com.example.use_cases
 
-import com.example.data.ApiServiceInteractor
 import com.example.data.errors.ResponseError
-import com.example.data.models.PostRemoteModel
-import com.example.use_cases.models.ItemMediaType
-import com.example.use_cases.models.PostItemModel
+import com.example.repos.feed.PostsRepo
+import com.example.repos.models.PostItemModel
+import com.example.use_cases.models.MediaType
+import com.example.use_cases.models.PostModel
 import dagger.Reusable
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @Reusable
-class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInteractor) {
+class GetPostsUseCase @Inject constructor(private val postsRepo: PostsRepo) {
     suspend operator fun invoke(
-    ): List<PostItemModel> {
+    ): List<PostModel> {
         return try {
-            val users = apiService.getUsers().await()
-            val posts = apiService.getPosts().await()
-            posts.documents.mapNotNull {
+            val response = postsRepo.getPosts()
+            val users = response.users
+            val posts = response.posts
+            posts.mapNotNull {
                 val username =
-                    users.documents.mapNotNull { user -> user.userFields?.username?.stringValue }
-                        .firstOrNull { username ->
-                            username == it.postFields?.authorID?.stringValue
-                        }
+                    users.mapNotNull { user ->
+                        user?.path?.replace(
+                            "projects/peach-assessment/databases/(default)/documents/users/",
+                            ""
+                        ) to user?.userFields?.username
+                    }
+                        .firstOrNull { (id, _) ->
+                            id == it?.postFields?.authorID?.stringValue
+                        }?.second?.stringValue
                 mapToItem(username, it)
             }
         } catch (e: ResponseError) {
@@ -29,24 +36,29 @@ class GetPostsUseCase @Inject constructor(private val apiService: ApiServiceInte
         }
     }
 
-    private fun mapToItem(username: String?, remoteModel: PostRemoteModel?): PostItemModel? {
-        return remoteModel?.postFields?.let {
+    private fun mapToItem(username: String?, itemModel: PostItemModel?): PostModel? {
+        return itemModel?.postFields?.let {
             with(it) {
                 val videoOrImage = when (mediaType?.stringValue) {
-                    "photo" -> ItemMediaType.IMAGE
-                    "video" -> ItemMediaType.VIDEO
+                    "photo" -> MediaType.IMAGE
+                    "video" -> MediaType.VIDEO
                     else -> null
                 }
 
                 id.stringValue?.let { id ->
-                    PostItemModel(
+                    PostModel(
                         id = id,
                         caption = caption?.stringValue,
                         comments = comments?.arrayValue?.values?.mapNotNull { comment -> comment.stringValue },
                         mediaType = videoOrImage,
-                        storageRef = storageRef?.stringValue,
+                        storageRef = storageRef,
                         authorUserName = username,
-                        createdAt = createdAt?.timestampValue?.let { dateTime -> LocalDateTime.parse(dateTime) }
+                        createdAt = createdAt?.timestampValue?.let { dateTime ->
+                            LocalDateTime.parse(
+                                dateTime,
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+                            )
+                        }
                     )
                 }
             }
