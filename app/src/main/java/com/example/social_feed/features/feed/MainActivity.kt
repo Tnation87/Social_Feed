@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +37,7 @@ import com.example.presentation.feed.FeedViewModel
 import com.example.presentation.models.FilerFeedValueUiModel
 import com.example.presentation.models.PostUiModel
 import com.example.presentation.models.UiMediaType
+import com.example.social_feed.R
 import com.example.social_feed.ui.theme.Social_FeedTheme
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -83,25 +86,25 @@ fun Feed(viewModel: FeedViewModel) {
 
 @Composable
 fun LoadingList() {
-    StateBox {
+    StateBox(modifier = Modifier.testTag(stringResource(R.string.test_tag_loading))) {
         CircularProgressIndicator(modifier = Modifier.size(100.dp))
     }
 }
 
 @Composable
 fun Error() {
-    StateBox {
+    StateBox(modifier = Modifier.testTag(stringResource(R.string.test_tag_error))) {
         Text(
-            text = "No posts found :(",
+            text = stringResource(R.string.error_message),
             textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
-fun StateBox(content: @Composable BoxScope.() -> Unit) {
+fun StateBox(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp), contentAlignment = Alignment.Center,
         content = content
@@ -110,7 +113,7 @@ fun StateBox(content: @Composable BoxScope.() -> Unit) {
 
 @Composable
 fun Posts(viewModel: FeedViewModel, postsList: List<PostUiModel>) {
-    Column {
+    Column(modifier = Modifier.testTag(stringResource(R.string.test_tag_feed))) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,7 +131,7 @@ fun Posts(viewModel: FeedViewModel, postsList: List<PostUiModel>) {
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .clickable { showDialog = true },
-                text = "Filter feed"
+                text = stringResource(R.string.filter_title)
             )
 
             if (showDialog)
@@ -151,11 +154,12 @@ fun FilterDialogView(viewModel: FeedViewModel, onDismiss: () -> Unit) {
         Column(
             Modifier
                 .padding(8.dp)
-                .background(color = MaterialTheme.colors.background),
+                .background(color = MaterialTheme.colors.background)
+                .testTag(stringResource(R.string.test_tag_dialog)),
         ) {
 
             Text(
-                text = "Filter feed:",
+                text = stringResource(R.string.filter_title),
                 modifier = Modifier.padding(8.dp),
                 fontSize = 16.sp
             )
@@ -195,7 +199,7 @@ fun FilterDialogView(viewModel: FeedViewModel, onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.cancel))
             }
 
 
@@ -208,7 +212,7 @@ fun FilterDialogView(viewModel: FeedViewModel, onDismiss: () -> Unit) {
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Text(text = "Filter")
+                Text(text = stringResource(R.string.filter_btn_txt))
             }
 
         }
@@ -299,7 +303,7 @@ fun CommentsHeader(icon: ImageVector, onClick: () -> Unit) {
         )
 
         Text(
-            text = "Comments",
+            text = stringResource(R.string.comments_title),
             fontWeight = FontWeight.Medium
         )
     }

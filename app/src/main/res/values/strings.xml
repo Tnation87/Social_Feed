@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Social_Feed</string>
+
+    <!-- Global strings -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Test tags -->
+    <string name="test_tag_loading" translatable="false" >loading</string>
+    <string name="test_tag_error" translatable="false" >error</string>
+    <string name="test_tag_feed" translatable="false" >feed</string>
+    <string name="test_tag_dialog" translatable="false" >dialog</string>
 </resources>
