@@ -4,24 +4,32 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.presentation.feed.FeedContract
 import com.example.presentation.feed.FeedViewModel
+import com.example.presentation.feed.FilerFeedValue
 import com.example.presentation.models.PostUiModel
 import com.example.presentation.models.UiMediaType
 import com.example.social_feed.ui.theme.Social_FeedTheme
@@ -40,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setIntent(FeedContract.ShowFeedIntent)
+        viewModel.setIntent(FeedContract.ShowFeedIntent())
 
         setContent {
             Social_FeedTheme {
@@ -63,6 +71,7 @@ fun Feed(viewModel: FeedViewModel) {
     when (state) {
         is FeedContract.FeedViewState.Loading -> LoadingList()
         is FeedContract.FeedViewState.Success -> Posts(
+            viewModel,
             (state as FeedContract.FeedViewState.Success).postsList
         )
         is FeedContract.FeedViewState.Error -> Error()
@@ -71,34 +80,134 @@ fun Feed(viewModel: FeedViewModel) {
 
 @Composable
 fun LoadingList() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp), contentAlignment = Alignment.Center
-    ) {
+    StateBox {
         CircularProgressIndicator(modifier = Modifier.size(100.dp))
     }
 }
 
 @Composable
 fun Error() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp), contentAlignment = Alignment.Center
-    ) {
+    StateBox {
         Text(
-            text = "We're facing issues getting posts, please try again later :(",
+            text = "No posts found :(",
             textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
-fun Posts(postsList: List<PostUiModel>) {
-    LazyColumn(contentPadding = PaddingValues(vertical = 16.dp)) {
-        items(postsList) { post ->
-            MediaPost(post)
+fun StateBox(content: @Composable BoxScope.() -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp), contentAlignment = Alignment.Center,
+        content = content
+    )
+}
+
+@Composable
+fun Posts(viewModel: FeedViewModel, postsList: List<PostUiModel>) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            var showDialog by remember { mutableStateOf(false) }
+
+            Icon(
+                modifier = Modifier.clickable { showDialog = true },
+                imageVector = Icons.Default.FilterAlt,
+                contentDescription = null
+            )
+
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .clickable { showDialog = true },
+                text = "Filter feed"
+            )
+
+            if (showDialog)
+                FilterDialogView(viewModel = viewModel) {
+                    showDialog = false
+                }
+        }
+
+        LazyColumn(contentPadding = PaddingValues(vertical = 16.dp)) {
+            items(postsList) { post ->
+                MediaPost(post)
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterDialogView(viewModel: FeedViewModel, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = { onDismiss() }) {
+        Column(
+            Modifier
+                .padding(8.dp)
+                .background(color = MaterialTheme.colors.background),
+        ) {
+
+            Text(
+                text = "Filter feed:",
+                modifier = Modifier.padding(8.dp),
+                fontSize = 16.sp
+            )
+
+            var selectedValue by remember { mutableStateOf(FilerFeedValue.NONE) }
+
+            val isSelectedItem: (FilerFeedValue) -> Boolean = { selectedValue == it }
+            val onChangeState: (FilerFeedValue) -> Unit = { selectedValue = it }
+
+            val items = listOf(FilerFeedValue.VIDEOS, FilerFeedValue.IMAGES)
+            Column(Modifier.padding(8.dp)) {
+                items.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .selectable(
+                                selected = isSelectedItem(item),
+                                onClick = { onChangeState(item) },
+                                role = Role.RadioButton
+                            )
+                            .padding(8.dp)
+                    ) {
+                        RadioButton(
+                            selected = isSelectedItem(item),
+                            onClick = null
+                        )
+                        Text(
+                            text = item.textVal,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            OutlinedButton(
+                onClick = { onDismiss() },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text = "Cancel")
+            }
+
+
+            Button(
+                onClick = {
+                    viewModel.setIntent(FeedContract.ShowFeedIntent(selectedValue))
+                    onDismiss()
+                },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text = "Filter")
+            }
+
         }
     }
 }

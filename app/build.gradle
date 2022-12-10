@@ -67,6 +67,7 @@ dependencies {
     implementation "io.coil-kt:coil-video:2.2.0"
     implementation "androidx.media3:media3-exoplayer:1.0.0-beta03"
     implementation "androidx.media3:media3-ui:1.0.0-beta03"
+    implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
 
     implementation project(':presentation')
 
