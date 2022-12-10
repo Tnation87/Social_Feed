@@ -2,9 +2,9 @@ package com.example.presentation.feed
 
 import androidx.lifecycle.viewModelScope
 import com.example.presentation.BaseViewModel
+import com.example.presentation.mappers.Mappers.filterFeedValueMapper
 import com.example.presentation.mappers.Mappers.postsMapper
 import com.example.use_cases.GetPostsUseCase
-import com.example.use_cases.models.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,20 +25,11 @@ class FeedViewModel @Inject constructor(val getPostsUseCase: GetPostsUseCase) :
     private fun getPosts(intent: FeedContract.ShowFeedIntent) {
         setState { FeedContract.FeedViewState.Loading }
         viewModelScope.launch(Dispatchers.IO) {
-            val postsList = getPostsUseCase()
-            val filteredPosts = postsList.filter {
-                val mediaType = it.mediaType
-                when (intent.filterValue) {
-                    FilerFeedValue.VIDEOS -> mediaType == MediaType.VIDEO
-                    FilerFeedValue.IMAGES
-                    -> mediaType == MediaType.IMAGE
-                    FilerFeedValue.NONE -> true
-                }
-            }
+            val postsList = getPostsUseCase(filterFeedValueMapper.mapFromUiModel(intent.filterValue))
 
-            if (filteredPosts.isNotEmpty()) {
+            if (postsList.isNotEmpty()) {
                 setState {
-                    FeedContract.FeedViewState.Success(filteredPosts.map {
+                    FeedContract.FeedViewState.Success(postsList.map {
                         postsMapper.mapToUiModel(
                             it
                         )

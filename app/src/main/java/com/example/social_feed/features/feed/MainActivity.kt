@@ -32,7 +32,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.presentation.feed.FeedContract
 import com.example.presentation.feed.FeedViewModel
-import com.example.presentation.feed.FilerFeedValue
+import com.example.presentation.models.FilerFeedValueUiModel
 import com.example.presentation.models.PostUiModel
 import com.example.presentation.models.UiMediaType
 import com.example.social_feed.ui.theme.Social_FeedTheme
@@ -160,12 +160,12 @@ fun FilterDialogView(viewModel: FeedViewModel, onDismiss: () -> Unit) {
                 fontSize = 16.sp
             )
 
-            var selectedValue by remember { mutableStateOf(FilerFeedValue.NONE) }
+            var selectedValue by remember { mutableStateOf(FilerFeedValueUiModel.NONE) }
 
-            val isSelectedItem: (FilerFeedValue) -> Boolean = { selectedValue == it }
-            val onChangeState: (FilerFeedValue) -> Unit = { selectedValue = it }
+            val isSelectedItem: (FilerFeedValueUiModel) -> Boolean = { selectedValue == it }
+            val onChangeState: (FilerFeedValueUiModel) -> Unit = { selectedValue = it }
 
-            val items = listOf(FilerFeedValue.VIDEOS, FilerFeedValue.IMAGES)
+            val items = listOf(FilerFeedValueUiModel.VIDEOS, FilerFeedValueUiModel.IMAGES)
             Column(Modifier.padding(8.dp)) {
                 items.forEach { item ->
                     Row(

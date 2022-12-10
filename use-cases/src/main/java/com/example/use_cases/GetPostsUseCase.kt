@@ -3,6 +3,7 @@ package com.example.use_cases
 import com.example.data.errors.ResponseError
 import com.example.repos.feed.PostsRepo
 import com.example.repos.models.PostItemModel
+import com.example.use_cases.models.FilterFeedValue
 import com.example.use_cases.models.MediaType
 import com.example.use_cases.models.PostModel
 import dagger.Reusable
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 @Reusable
 class GetPostsUseCase @Inject constructor(private val postsRepo: PostsRepo) {
-    suspend operator fun invoke(
+    suspend operator fun invoke(filterFeedValue: FilterFeedValue = FilterFeedValue.NONE
     ): List<PostModel> {
         return try {
             val response = postsRepo.getPosts()
@@ -30,6 +31,13 @@ class GetPostsUseCase @Inject constructor(private val postsRepo: PostsRepo) {
                             id == it?.postFields?.authorID?.stringValue
                         }?.second?.stringValue
                 mapToItem(username, it)
+            }.filter {
+                val mediaType = it.mediaType
+                when (filterFeedValue) {
+                    FilterFeedValue.VIDEOS -> mediaType == MediaType.VIDEO
+                    FilterFeedValue.IMAGES -> mediaType == MediaType.IMAGE
+                    FilterFeedValue.NONE -> true
+                }
             }
         } catch (e: ResponseError) {
             emptyList()
