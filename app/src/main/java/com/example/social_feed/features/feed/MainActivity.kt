@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.presentation.feed.FeedContract
@@ -25,6 +26,8 @@ import com.example.presentation.models.PostUiModel
 import com.example.presentation.models.UiMediaType
 import com.example.social_feed.ui.theme.Social_FeedTheme
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ui.StyledPlayerView
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -93,18 +96,15 @@ fun Error() {
 
 @Composable
 fun Posts(postsList: List<PostUiModel>) {
-    val context = LocalContext.current
     LazyColumn(contentPadding = PaddingValues(vertical = 16.dp)) {
-        itemsIndexed(items = postsList, key = { _, post -> post.id }) { index, post ->
-            MediaPost(exoPlayer = remember(context) {
-                ExoPlayer.Builder(context).build()
-            }, index = index, post = post)
+        items(postsList) { post ->
+            MediaPost(post)
         }
     }
 }
 
 @Composable
-fun MediaPost(exoPlayer: ExoPlayer, index: Int, post: PostUiModel) {
+fun MediaPost(post: PostUiModel) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
 
         post.authorUserName?.let { Text(text = it, fontWeight = FontWeight.Bold) }
@@ -123,9 +123,7 @@ fun MediaPost(exoPlayer: ExoPlayer, index: Int, post: PostUiModel) {
                     )
                 }
                 UiMediaType.VIDEO -> VideoScreen(
-                    exoPlayer = exoPlayer,
-                    video = post.storageRef,
-                    index = index
+                    video = post.storageRef
                 )
             }
         }
@@ -162,26 +160,28 @@ fun MediaPost(exoPlayer: ExoPlayer, index: Int, post: PostUiModel) {
 }
 
 @Composable
-fun VideoScreen(exoPlayer: ExoPlayer, video: Uri?, index: Int) {
-    Box {
-        VideoPlayer(exoPlayer)
-    }
-}
-
-@Composable
-fun VideoPlayer(
-    exoPlayer: ExoPlayer
-) {
+fun VideoScreen(video: Uri?) {
     val context = LocalContext.current
-//    val playerView = remember {
-//        val layout = LayoutInflater.from(context).inflate(R.layout.video_player, null, false)
-////        val playerView = layout.findViewById(R.id.playerView) as StyledPlayerView
-////        playerView.apply {
-////            player = exoPlayer
-////        }
-//    }
 
-    //AndroidView({ playerView })
+    val exoPlayer = ExoPlayer.Builder(LocalContext.current)
+        .build()
+        .also { exoPlayer ->
+            val mediaItem = MediaItem.Builder()
+                .setUri(video)
+                .build()
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+        }
+
+    DisposableEffect(
+        AndroidView(modifier = Modifier.padding(vertical = 8.dp), factory = {
+            StyledPlayerView(context).apply {
+                player = exoPlayer
+            }
+        })
+    ) {
+        onDispose { exoPlayer.release() }
+    }
 }
 
 @Preview(showBackground = true)
