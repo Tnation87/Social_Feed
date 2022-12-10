@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_message">No posts found :(</string>
-    <string name="filter_title">Filter title:</string>
+    <string name="filter_title">Filter feed</string>
     <string name="filter_btn_txt">Filter</string>
     <string name="comments_title">Comments</string>
 </resources>
